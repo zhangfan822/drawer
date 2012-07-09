@@ -68,8 +68,8 @@ public class Drawer implements OnClickListener, OnTouchListener
 	}
 
 	/**
-	 * Calculates duration of animation. When {@link Drawer} is in state of moving,
-	 * duration of animation will be calculated based on the position.
+	 * Calculates duration of animation. When {@link Drawer} is in state of
+	 * moving, duration of animation will be calculated based on the position.
 	 * 
 	 * @param show Animation for showing/hiding
 	 * @return time in milliseconds
@@ -86,7 +86,8 @@ public class Drawer implements OnClickListener, OnTouchListener
 	}
 
 	/**
-	 * Cancel (dismiss) {@link Drawer}. If animation is enabled it will be played.
+	 * Cancel (dismiss) {@link Drawer}. If animation is enabled it will be
+	 * played.
 	 */
 	public void cancel()
 	{
@@ -179,8 +180,10 @@ public class Drawer implements OnClickListener, OnTouchListener
 		mDrawerClickable.setOnTouchListener(this);
 		mDecorView.addView(mDrawerClickable);
 
+		LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT);
+
 		mDrawerContent = (LinearLayout) mDrawer.findViewById(R.id.drawer_content);
-		mDrawerContent.addView(View.inflate(mContext, mLayout, null));
+		mDrawerContent.addView(View.inflate(mContext, mLayout, null), lp);
 
 		updateDrawerWidth();
 	}
@@ -302,7 +305,7 @@ public class Drawer implements OnClickListener, OnTouchListener
 
 		mDrawerActivity.setPadding(0, mDrawerActivity.getPaddingTop(), mDrawerActivity.getPaddingRight(), mDrawerActivity.getPaddingBottom());
 		mDrawerActivity.requestLayout();
-		
+
 		mDrawerClickable.setVisibility(View.GONE);
 
 		mDecorView.removeView(mDrawer);
@@ -421,7 +424,8 @@ public class Drawer implements OnClickListener, OnTouchListener
 	}
 
 	/**
-	 * Updates {@link Drawer} width. It is based on {@link Activity} minus margin provided in constructor.
+	 * Updates {@link Drawer} width. It is based on {@link Activity} minus
+	 * margin provided in constructor.
 	 */
 	private void updateDrawerWidth()
 	{
