@@ -1,6 +1,7 @@
 package pl.verdigo.libraries.drawer;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -21,7 +22,11 @@ import com.actionbarsherlock.internal.nineoldandroids.animation.ObjectAnimator;
 public class Drawer implements OnClickListener, OnTouchListener
 {
 
+	public static final float LAND_NO_CHANGE = -1f;
+
 	private static final long DEFAULT_DURATION = 350;
+
+	private int mActivityWidth;
 
 	private boolean mAnimationEnabled = true;
 
@@ -41,6 +46,10 @@ public class Drawer implements OnClickListener, OnTouchListener
 
 	private final float mDrawerMargin;
 
+	private int mDrawerWidth;
+
+	private float mLandDrawerWidth;
+
 	private final int mLayout;
 
 	private boolean mMovable = true;
@@ -55,14 +64,13 @@ public class Drawer implements OnClickListener, OnTouchListener
 
 	private boolean mVisible = false;
 
-	private int mDrawerWidth;
-
-	public Drawer(Context context, int layout, Window parentWindow, float drawerMargin)
+	public Drawer(Context context, int layout, Window parentWindow, float drawerMargin, float landDrawerWidth)
 	{
 		mContext = context;
 		mLayout = layout;
 		mParentWindow = parentWindow;
 		mDrawerMargin = drawerMargin;
+		mLandDrawerWidth = landDrawerWidth;
 
 		init();
 	}
@@ -155,7 +163,19 @@ public class Drawer implements OnClickListener, OnTouchListener
 	 */
 	private int getDrawerMargin()
 	{
-		return (int) Math.ceil(mDrawerMargin * mContext.getResources().getDisplayMetrics().density);
+		float margin = mDrawerMargin;
+		float density = mContext.getResources().getDisplayMetrics().density;
+
+		if (mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE && mLandDrawerWidth != LAND_NO_CHANGE)
+		{
+			System.out.println("mActivityWidth = "  +mActivityWidth);
+			System.out.println("density = "  +density);
+			System.out.println("mLandDrawerWidth = "  +mLandDrawerWidth);
+			margin = (mActivityWidth / density) - mLandDrawerWidth;
+			System.out.println("margin = " + margin);
+		}
+
+		return (int) Math.ceil(margin * density);
 	}
 
 	/**
@@ -168,6 +188,8 @@ public class Drawer implements OnClickListener, OnTouchListener
 	{
 		mDecorView = (FrameLayout) mParentWindow.getDecorView();
 		mDrawerActivity = (ViewGroup) mDecorView.getChildAt(0);
+
+		mActivityWidth = mDrawerActivity.getWidth();
 
 		mDrawer = View.inflate(mContext, R.layout.drawer_placeholder, null);
 		mDrawer.setPadding(0, mDrawerActivity.getPaddingTop(), 0, mDrawerActivity.getPaddingBottom());
@@ -380,7 +402,7 @@ public class Drawer implements OnClickListener, OnTouchListener
 		else
 		{
 			DrawerProxy proxy = new DrawerProxy(mDrawerActivity, mDrawer);
-			proxy.setLeft(mDrawerActivity.getWidth() - getDrawerMargin());
+			proxy.setLeft(mActivityWidth - getDrawerMargin());
 
 			updateDrawerClickable();
 		}
@@ -430,9 +452,9 @@ public class Drawer implements OnClickListener, OnTouchListener
 	private void updateDrawerWidth()
 	{
 		mDrawer.getLayoutParams().width = 0;
-		mDrawer.findViewById(R.id.drawer_content).getLayoutParams().width = mDrawerActivity.getWidth() - getDrawerMargin();
+		mDrawer.findViewById(R.id.drawer_content).getLayoutParams().width = mActivityWidth - getDrawerMargin();
 
-		mDrawerWidth = mDrawerActivity.getWidth() - getDrawerMargin();
+		mDrawerWidth = mActivityWidth - getDrawerMargin();
 	}
 
 	public class DrawerProxy
