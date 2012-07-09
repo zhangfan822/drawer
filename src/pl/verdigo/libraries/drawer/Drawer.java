@@ -168,11 +168,7 @@ public class Drawer implements OnClickListener, OnTouchListener
 
 		if (mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE && mLandDrawerWidth != LAND_NO_CHANGE)
 		{
-			System.out.println("mActivityWidth = "  +mActivityWidth);
-			System.out.println("density = "  +density);
-			System.out.println("mLandDrawerWidth = "  +mLandDrawerWidth);
 			margin = (mActivityWidth / density) - mLandDrawerWidth;
-			System.out.println("margin = " + margin);
 		}
 
 		return (int) Math.ceil(margin * density);
