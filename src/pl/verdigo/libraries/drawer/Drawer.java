@@ -60,7 +60,11 @@ public class Drawer implements OnClickListener, OnTouchListener
 
 	private int mMovedPosition = 0;
 
+	private boolean mNeedToReinitialize = false;
+
 	private final Window mParentWindow;
+
+	private boolean mReuse = false;
 
 	private boolean mVisible = false;
 
@@ -193,9 +197,6 @@ public class Drawer implements OnClickListener, OnTouchListener
 
 		mDrawerClickable = new ImageView(mContext);
 		mDrawerClickable.setVisibility(View.GONE);
-		mDrawerClickable.setClickable(true);
-		mDrawerClickable.setOnClickListener(this);
-		mDrawerClickable.setOnTouchListener(this);
 		mDecorView.addView(mDrawerClickable);
 
 		LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT);
@@ -315,19 +316,29 @@ public class Drawer implements OnClickListener, OnTouchListener
 	 */
 	protected void removeDrawer()
 	{
+		mMovedBeyondMargin = false;
+		mMovedPosition = 0;
+		
 		((FrameLayout) mDrawerActivity.getParent()).setBackgroundDrawable(mBackground);
-
+		
 		ViewGroup.LayoutParams lp = ((ViewGroup) mDrawerActivity).getLayoutParams();
 		lp.width = -1;
 		mDrawerActivity.setLayoutParams(lp);
-
+		
 		mDrawerActivity.setPadding(0, mDrawerActivity.getPaddingTop(), mDrawerActivity.getPaddingRight(), mDrawerActivity.getPaddingBottom());
 		mDrawerActivity.requestLayout();
-
+		
 		mDrawerClickable.setVisibility(View.GONE);
+
+		if (mReuse)
+		{
+			return;
+		}
 
 		mDecorView.removeView(mDrawer);
 		mDecorView.removeView(mDrawerClickable);
+
+		mNeedToReinitialize = true;
 	}
 
 	/**
@@ -375,6 +386,16 @@ public class Drawer implements OnClickListener, OnTouchListener
 	}
 
 	/**
+	 * Sets whether content of {@link Drawer} will be reused or not.
+	 * 
+	 * @param reuse true/false
+	 */
+	public void setReuse(boolean reuse)
+	{
+		mReuse = reuse;
+	}
+
+	/**
 	 * Shows {@link Drawer}. If animation is enabled it will be played.
 	 */
 	public void show()
@@ -382,6 +403,11 @@ public class Drawer implements OnClickListener, OnTouchListener
 		if (isVisible())
 		{
 			return;
+		}
+
+		if (mNeedToReinitialize)
+		{
+			init();
 		}
 
 		mMoved = false;
@@ -439,6 +465,9 @@ public class Drawer implements OnClickListener, OnTouchListener
 
 		mDrawerClickable.setLayoutParams(lp);
 		mDrawerClickable.setVisibility(View.VISIBLE);
+		mDrawerClickable.setClickable(true);
+		mDrawerClickable.setOnClickListener(this);
+		mDrawerClickable.setOnTouchListener(this);
 	}
 
 	/**
