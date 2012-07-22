@@ -91,7 +91,9 @@ public class Drawer implements OnClickListener, OnTouchListener
 		if (mMoved)
 		{
 			float ratio = (float) mMovedPosition / mDrawerWidth;
-			return Math.round(DEFAULT_DURATION * (show ? 1F - ratio : ratio));
+			long duration = Math.round(DEFAULT_DURATION * (show ? 1F - ratio : ratio));
+
+			return duration >= 0 ? duration : 0;
 		}
 
 		return DEFAULT_DURATION;
