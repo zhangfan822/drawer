@@ -162,6 +162,35 @@ public class Drawer implements OnClickListener, OnTouchListener
 	}
 
 	/**
+	 * Cancel (dismiss) {@link Drawer} without animation. This is equivalent to
+	 * <pre>
+	 * boolean previous = drawer.getAnimationEnabled();
+	 * drawer.setAnimationEnabled(false);
+	 * drawer.cancel();
+	 * drawer.setAnimationEnabled(previous);
+	 * </pre>
+	 */
+	public void cancelWithoutAnimation()
+	{
+		boolean animationEnabled = mAnimationEnabled;
+		mAnimationEnabled = false;
+
+		cancel();
+
+		mAnimationEnabled = animationEnabled;
+	}
+
+	/**
+	 * Returns true if animation is enabled.
+	 * 
+	 * @return Boolean
+	 */
+	public boolean getAnimationEnabled()
+	{
+		return mAnimationEnabled;
+	}
+
+	/**
 	 * Returns {@link Drawer} margin. Value provided by developer is in DPI,
 	 * therefore it has to be calculated into pixels.
 	 * 
@@ -334,6 +363,10 @@ public class Drawer implements OnClickListener, OnTouchListener
 
 		if (mReuse)
 		{
+			ViewGroup.LayoutParams params = mDrawer.getLayoutParams();
+			params.width = 0;
+			mDrawer.setLayoutParams(params);
+
 			return;
 		}
 
