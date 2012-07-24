@@ -164,7 +164,7 @@ public class Drawer implements OnClickListener, OnTouchListener
 	/**
 	 * Cancel (dismiss) {@link Drawer} without animation. This is equivalent to
 	 * <pre>
-	 * boolean previous = drawer.getAnimationEnabled();
+	 * boolean previous = drawer.isAnimationEnabled();
 	 * drawer.setAnimationEnabled(false);
 	 * drawer.cancel();
 	 * drawer.setAnimationEnabled(previous);
@@ -178,16 +178,6 @@ public class Drawer implements OnClickListener, OnTouchListener
 		cancel();
 
 		mAnimationEnabled = animationEnabled;
-	}
-
-	/**
-	 * Returns true if animation is enabled.
-	 * 
-	 * @return Boolean
-	 */
-	public boolean getAnimationEnabled()
-	{
-		return mAnimationEnabled;
 	}
 
 	/**
