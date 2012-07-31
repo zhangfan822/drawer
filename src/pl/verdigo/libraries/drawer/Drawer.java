@@ -18,6 +18,7 @@ import android.widget.LinearLayout;
 import com.actionbarsherlock.internal.nineoldandroids.animation.Animator;
 import com.actionbarsherlock.internal.nineoldandroids.animation.Animator.AnimatorListener;
 import com.actionbarsherlock.internal.nineoldandroids.animation.ObjectAnimator;
+import com.actionbarsherlock.internal.nineoldandroids.view.animation.AnimatorProxy;
 
 public class Drawer implements OnClickListener, OnTouchListener
 {
@@ -47,6 +48,8 @@ public class Drawer implements OnClickListener, OnTouchListener
 	private final float mDrawerMargin;
 
 	private int mDrawerWidth;
+
+	private boolean mFadeDrawer = false;
 
 	private float mLandDrawerWidth;
 
@@ -401,6 +404,16 @@ public class Drawer implements OnClickListener, OnTouchListener
 	}
 
 	/**
+	 * Sets whether {@link Drawer} will fade to black on animation.
+	 * 
+	 * @param fadeDrawer true/false
+	 */
+	public void setFadeDrawer(boolean fadeDrawer)
+	{
+		mFadeDrawer = fadeDrawer;
+	}
+
+	/**
 	 * Sets whether {@link Drawer} is movable by touch events.
 	 * 
 	 * @param movable true/false
@@ -514,6 +527,8 @@ public class Drawer implements OnClickListener, OnTouchListener
 
 		private View mView;
 
+		private AnimatorProxy mViewAlpha;
+
 		private View mViewWidth;
 
 		public DrawerProxy(View view, View viewWidth)
@@ -521,11 +536,18 @@ public class Drawer implements OnClickListener, OnTouchListener
 			mView = view;
 			mViewWidth = viewWidth;
 			mOriginalWidth = mDrawerWidth + getDrawerMargin();
+			mViewAlpha = AnimatorProxy.wrap(mDrawerContent);
 		}
 
 		public int getLeft()
 		{
 			return mView.getPaddingLeft();
+		}
+
+		public void setAlpha(int position)
+		{
+			float value = (new Float(position) / new Float(mDrawerWidth)) * 0.7f + 0.3f;
+			mViewAlpha.setAlpha(value);
 		}
 
 		public void setLeft(int left)
@@ -534,6 +556,11 @@ public class Drawer implements OnClickListener, OnTouchListener
 
 			setWidth(mView, mOriginalWidth + left);
 			setWidth(mViewWidth, left);
+
+			if (mFadeDrawer)
+			{
+				setAlpha(left);
+			}
 		}
 
 		public void setWidth(View view, int width)
