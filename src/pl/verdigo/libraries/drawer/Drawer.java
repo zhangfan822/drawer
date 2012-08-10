@@ -1,7 +1,6 @@
 package pl.verdigo.libraries.drawer;
 
 import static android.view.ViewGroup.LayoutParams.FILL_PARENT;
-import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
@@ -25,8 +24,15 @@ import com.actionbarsherlock.internal.nineoldandroids.animation.Animator.Animato
 import com.actionbarsherlock.internal.nineoldandroids.animation.ObjectAnimator;
 import com.actionbarsherlock.internal.nineoldandroids.view.animation.AnimatorProxy;
 
+/**
+ * Drawer implementation. TODO create documentation in JavaDoc here.
+ * 
+ * @author Lukasz Milewski <lukasz.milewski@gmail.com>
+ */
 public class Drawer implements OnClickListener, OnTouchListener
 {
+
+	private static final int DRAWER_CONTENT_MOVE_PROPORTION = 5;
 
 	public static final float LAND_NO_CHANGE = -1f;
 
@@ -68,6 +74,8 @@ public class Drawer implements OnClickListener, OnTouchListener
 
 	private boolean mMoved = false;
 
+	private boolean mMoveDrawer = false;
+
 	private boolean mMovedBeyondMargin = false;
 
 	private int mMovedPosition = 0;
@@ -80,6 +88,15 @@ public class Drawer implements OnClickListener, OnTouchListener
 
 	private boolean mVisible = false;
 
+	/**
+	 * Creates {@link Drawer} object.
+	 * 
+	 * @param context Context
+	 * @param layout Layout to inflate into {@link Drawer}
+	 * @param parentWindow Window
+	 * @param drawerMargin Right margin in portrait mode
+	 * @param landDrawerWidth {@link Drawer} width in landscape mode
+	 */
 	public Drawer(Context context, int layout, Window parentWindow, float drawerMargin, float landDrawerWidth)
 	{
 		mContext = context;
@@ -195,7 +212,7 @@ public class Drawer implements OnClickListener, OnTouchListener
 	/**
 	 * Creates DrawerProxy object.
 	 * 
-	 * @return DrawerProxy
+	 * @return DrawerProxy object
 	 */
 	private DrawerProxy createDrawerProxy()
 	{
@@ -270,11 +287,33 @@ public class Drawer implements OnClickListener, OnTouchListener
 	}
 
 	/**
+	 * Is fading {@link Drawer} enabled.
+	 * 
+	 * @return Boolean
+	 */
+	public boolean isFadeDrawer()
+	{
+		return mFadeDrawer;
+	}
+
+	/**
 	 * Is {@link Drawer} movable with touch events.
+	 * 
+	 * @return Boolean
 	 */
 	public boolean isMovable()
 	{
 		return mMovable;
+	}
+
+	/**
+	 * Is moving content of {@link Drawer} enabled.
+	 * 
+	 * @return Boolean
+	 */
+	public boolean isMoveDrawer()
+	{
+		return mMoveDrawer;
 	}
 
 	/**
@@ -290,6 +329,8 @@ public class Drawer implements OnClickListener, OnTouchListener
 
 	/**
 	 * Handles click event.
+	 * 
+	 * @param view Clicked view
 	 */
 	public void onClick(View view)
 	{
@@ -302,6 +343,9 @@ public class Drawer implements OnClickListener, OnTouchListener
 	/**
 	 * Handles touch events. If {@link Drawer} is not movable all touch events
 	 * are ignored.
+	 * 
+	 * @param view Touched view
+	 * @param event Event
 	 */
 	public boolean onTouch(View view, MotionEvent event)
 	{
@@ -454,6 +498,16 @@ public class Drawer implements OnClickListener, OnTouchListener
 	}
 
 	/**
+	 * Sets whether content of {@link Drawer} is move during animation.
+	 * 
+	 * @param moveDrawer true/false
+	 */
+	public void setMoveDrawer(boolean moveDrawer)
+	{
+		mMoveDrawer = moveDrawer;
+	}
+
+	/**
 	 * Sets whether content of {@link Drawer} will be reused or not.
 	 * 
 	 * @param reuse true/false
@@ -565,6 +619,11 @@ public class Drawer implements OnClickListener, OnTouchListener
 		mDrawerWidth = mActivityWidth - getDrawerMargin();
 	}
 
+	/**
+	 * Internal DrawerProxy class to handle animation of {@link Drawer}
+	 * 
+	 * @author Lukasz Milewski <lukasz.milewski@gmail.com>
+	 */
 	public class DrawerProxy
 	{
 
@@ -598,20 +657,32 @@ public class Drawer implements OnClickListener, OnTouchListener
 			mViewAlpha.setAlpha(value);
 		}
 
-		@TargetApi(12)
 		public void setLeft(int left)
 		{
-			mView.setPadding(left, mView.getPaddingTop(), mView.getPaddingRight(), mView.getPaddingBottom());
-			mViewShadow.setPadding(left - 8, mViewShadow.getPaddingTop(), mViewShadow.getPaddingRight(), mViewShadow.getPaddingBottom());
+			setLeftPadding(mView, left);
+			setLeftPadding(mViewShadow, left - 8);
 
 			setWidth(mView, mOriginalWidth + left);
 			setWidth(mViewShadow, left);
 			setWidth(mViewWidth, left);
 
+			if (mMoveDrawer)
+			{
+				int maxLeft = mDrawerWidth / DRAWER_CONTENT_MOVE_PROPORTION;
+				int negativePaddingLeft = -1 * (int) (maxLeft - (Float.valueOf(left) / 5));
+
+				setLeftPadding(mViewWidth, negativePaddingLeft);
+			}
+
 			if (mFadeDrawer)
 			{
 				setAlpha(left);
 			}
+		}
+
+		private void setLeftPadding(View view, int left)
+		{
+			view.setPadding(left, view.getPaddingTop(), view.getPaddingRight(), view.getPaddingBottom());
 		}
 
 		public void setWidth(View view, int width)
