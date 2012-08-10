@@ -669,7 +669,7 @@ public class Drawer implements OnClickListener, OnTouchListener
 			if (mMoveDrawer)
 			{
 				int maxLeft = mDrawerWidth / DRAWER_CONTENT_MOVE_PROPORTION;
-				int negativePaddingLeft = -1 * (int) (maxLeft - (Float.valueOf(left) / 5));
+				int negativePaddingLeft = -1 * (int) (maxLeft - (Float.valueOf(left) / DRAWER_CONTENT_MOVE_PROPORTION));
 
 				setLeftPadding(mViewWidth, negativePaddingLeft);
 			}
