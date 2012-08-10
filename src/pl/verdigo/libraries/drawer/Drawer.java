@@ -30,7 +30,7 @@ public class Drawer implements OnClickListener, OnTouchListener
 
 	public static final float LAND_NO_CHANGE = -1f;
 
-	private static final long DEFAULT_DURATION = 350;
+	private static final long DEFAULT_DURATION = 250;
 
 	private static final int DRAWER_SHADOW_WIDTH = 12;
 
@@ -540,6 +540,9 @@ public class Drawer implements OnClickListener, OnTouchListener
 		mDrawerClickable.setOnTouchListener(this);
 	}
 
+	/**
+	 * Updates shadow - position and visibility.
+	 */
 	private void updateDrawerShadow()
 	{
 		FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mDrawerShadow.getLayoutParams();
