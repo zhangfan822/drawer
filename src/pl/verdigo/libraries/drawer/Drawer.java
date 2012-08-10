@@ -410,7 +410,7 @@ public class Drawer implements OnClickListener, OnTouchListener
 	/**
 	 * Removed {@link Drawer} from parent {@link Activity}.
 	 */
-	protected void removeDrawer()
+	public void removeDrawer()
 	{
 		mMovedBeyondMargin = false;
 		mMovedPosition = 0;
@@ -685,7 +685,7 @@ public class Drawer implements OnClickListener, OnTouchListener
 			view.setPadding(left, view.getPaddingTop(), view.getPaddingRight(), view.getPaddingBottom());
 		}
 
-		public void setWidth(View view, int width)
+		private void setWidth(View view, int width)
 		{
 			ViewGroup.LayoutParams params = view.getLayoutParams();
 			params.width = width;
