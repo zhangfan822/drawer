@@ -146,7 +146,7 @@ public class Drawer implements OnClickListener, OnTouchListener
 	{
 		final int start = mMoved ? mMovedPosition : mDrawerWidth;
 
-		ObjectAnimator anim = ObjectAnimator.ofInt(new DrawerProxy(mDrawerActivity, mDrawer, mDrawerShadow), "left", start, 0);
+		ObjectAnimator anim = ObjectAnimator.ofInt(createDrawerProxy(), "left", start, 0);
 		anim.setInterpolator(new DecelerateInterpolator());
 		anim.setDuration(calculateDuration(false));
 		anim.addListener(new AnimatorListener()
@@ -190,6 +190,16 @@ public class Drawer implements OnClickListener, OnTouchListener
 		cancel();
 
 		mAnimationEnabled = animationEnabled;
+	}
+
+	/**
+	 * Creates DrawerProxy object.
+	 * 
+	 * @return DrawerProxy
+	 */
+	private DrawerProxy createDrawerProxy()
+	{
+		return new DrawerProxy(mDrawerActivity, mDrawer, mDrawerShadow, mDrawerContent);
 	}
 
 	/**
@@ -322,7 +332,7 @@ public class Drawer implements OnClickListener, OnTouchListener
 			}
 			else if (!isAnimationEnabled())
 			{
-				DrawerProxy proxy = new DrawerProxy(mDrawerActivity, mDrawer, mDrawerShadow);
+				DrawerProxy proxy = createDrawerProxy();
 				proxy.setLeft(mDrawerWidth);
 			}
 
@@ -344,7 +354,7 @@ public class Drawer implements OnClickListener, OnTouchListener
 				mMovedBeyondMargin = true;
 			}
 
-			DrawerProxy proxy = new DrawerProxy(mDrawerActivity, mDrawer, mDrawerShadow);
+			DrawerProxy proxy = createDrawerProxy();
 			proxy.setLeft(mMovedPosition);
 
 			return true;
@@ -481,7 +491,7 @@ public class Drawer implements OnClickListener, OnTouchListener
 		}
 		else
 		{
-			DrawerProxy proxy = new DrawerProxy(mDrawerActivity, mDrawer, mDrawerShadow);
+			DrawerProxy proxy = createDrawerProxy();
 			proxy.setLeft(mActivityWidth - getDrawerMargin());
 
 			updateDrawerClickable();
@@ -500,7 +510,7 @@ public class Drawer implements OnClickListener, OnTouchListener
 	{
 		final int start = mMoved ? mMovedPosition : 0;
 
-		ObjectAnimator anim = ObjectAnimator.ofInt(new DrawerProxy(mDrawerActivity, mDrawer, mDrawerShadow), "left", start, mDrawerWidth);
+		ObjectAnimator anim = ObjectAnimator.ofInt(createDrawerProxy(), "left", start, mDrawerWidth);
 		anim.setInterpolator(new AccelerateInterpolator());
 		anim.setDuration(calculateDuration(true));
 		anim.start();
@@ -534,7 +544,7 @@ public class Drawer implements OnClickListener, OnTouchListener
 	{
 		FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mDrawerShadow.getLayoutParams();
 		lp.gravity = Gravity.FILL_VERTICAL;
-		lp.width = 12;
+		lp.width = 0;
 
 		mDrawerShadow.setLayoutParams(lp);
 		mDrawerShadow.setVisibility(View.VISIBLE);
@@ -565,13 +575,13 @@ public class Drawer implements OnClickListener, OnTouchListener
 
 		private View mViewWidth;
 
-		public DrawerProxy(View view, View viewWidth, View viewShadow)
+		public DrawerProxy(View view, View viewWidth, View viewShadow, View alphaView)
 		{
 			mView = view;
 			mViewWidth = viewWidth;
 			mViewShadow = viewShadow;
 			mOriginalWidth = mDrawerWidth + getDrawerMargin();
-			mViewAlpha = AnimatorProxy.wrap(mDrawerContent);
+			mViewAlpha = AnimatorProxy.wrap(alphaView);
 		}
 
 		public int getLeft()
