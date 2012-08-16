@@ -58,13 +58,15 @@ public class Drawer implements OnClickListener, OnTouchListener
 
 	private View mDrawerActivity;
 
-	private View mDrawerShadow;
-
 	private ImageView mDrawerClickable;
 
 	private LinearLayout mDrawerContent;
 
+	private DrawerListener mDrawerListener;
+
 	private final float mDrawerMargin;
+
+	private View mDrawerShadow;
 
 	private int mDrawerWidth;
 
@@ -141,6 +143,11 @@ public class Drawer implements OnClickListener, OnTouchListener
 		if (!mVisible)
 		{
 			return;
+		}
+
+		if (mDrawerListener != null)
+		{
+			mDrawerListener.onBeforeCancel();
 		}
 
 		mVisible = false;
@@ -523,6 +530,16 @@ public class Drawer implements OnClickListener, OnTouchListener
 	{
 		mDrawerContent.setBackgroundResource(drawable);
 		mDrawerContent.setPadding(0, 0, 0, 0);
+	}
+
+	/**
+	 * Sets {@link DrawerListener} listener.
+	 * 
+	 * @param listener New listener
+	 */
+	public void setDrawerListener(DrawerListener listener)
+	{
+		mDrawerListener = listener;
 	}
 
 	/**
