@@ -1,6 +1,8 @@
 package pl.verdigo.libraries.drawer;
 
 import android.view.MotionEvent;
+import android.view.Window;
+import android.widget.FrameLayout;
 
 public class BezelSwipe
 {
@@ -12,6 +14,8 @@ public class BezelSwipe
 
 	private int mActionBarHeight;
 
+	private int mDecorWindowPosition = 0;
+
 	private Drawer mDrawer;
 
 	private boolean mIsBeingDragged = false;
@@ -22,11 +26,16 @@ public class BezelSwipe
 
 	private int mLeftDragAreaWidth;
 
-	public BezelSwipe(Drawer drawer, int actionBarHeight, int leftDragAreaWidth)
+	public BezelSwipe(Window parentWindow, Drawer drawer, int actionBarHeight, int leftDragAreaWidth)
 	{
 		mDrawer = drawer;
 		mActionBarHeight = actionBarHeight;
 		mLeftDragAreaWidth = leftDragAreaWidth;
+		// mDecorWindowPosition = parentWindow.getWindowManager().getDefaultDisplay().getHeight() - parentWindow.getDecorView().getHeight();
+
+		FrameLayout mDecorView = (FrameLayout) parentWindow.getDecorView();
+		System.out.println(mDecorView.getHeight());
+		System.out.println(mDecorView.getChildAt(0).getHeight());
 	}
 
 	private void cancelSwipe()
@@ -40,7 +49,7 @@ public class BezelSwipe
 		int x = Math.round(ev.getX());
 		int y = Math.round(ev.getY());
 
-		if (!mIsBeingDragged && y < mActionBarHeight)
+		if (!mIsBeingDragged && y < (mActionBarHeight + mDecorWindowPosition))
 		{
 			return DispatchState.CALL_SUPER;
 		}
@@ -77,15 +86,22 @@ public class BezelSwipe
 
 			return DispatchState.CALL_SUPER;
 		}
-		
+
 		if (ev.getAction() == MotionEvent.ACTION_MOVE && mIsBeingDragged)
 		{
-			mDrawer.show();
+			mDrawer.isMovable();
+			mDrawer.setAllowCloseOnTouch(false);
+			mDrawer.showWithTouch(x);
+			mDrawer.onTouch(null, ev);
+
 			return DispatchState.RETURN_FALSE;
 		}
 
 		if ((ev.getAction() == MotionEvent.ACTION_UP || ev.getAction() == MotionEvent.ACTION_CANCEL) && mIsBeingDragged)
 		{
+			mDrawer.onTouch(null, ev);
+			mDrawer.setAllowCloseOnTouch(true);
+
 			cancelSwipe();
 			mIsBeingDragged = false;
 		}

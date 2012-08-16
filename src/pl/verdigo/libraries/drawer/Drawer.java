@@ -42,6 +42,8 @@ public class Drawer implements OnClickListener, OnTouchListener
 
 	private int mActivityWidth;
 
+	private boolean mAllowCloseOnTouch = true;
+
 	private boolean mAnimationEnabled = true;
 
 	private Drawable mBackground;
@@ -49,6 +51,8 @@ public class Drawer implements OnClickListener, OnTouchListener
 	private final Context mContext;
 
 	private FrameLayout mDecorView;
+
+	private int mDeviation = 0;
 
 	private View mDrawer;
 
@@ -277,6 +281,16 @@ public class Drawer implements OnClickListener, OnTouchListener
 	}
 
 	/**
+	 * Is closing {link Drawer} on touch events allowed. Used primarily with Bezel Swipe.
+	 * 
+	 * @return Boolean
+	 */
+	public boolean isAllowCloseOnTouch()
+	{
+		return mAllowCloseOnTouch;
+	}
+
+	/**
 	 * Is animation currently enabled.
 	 * 
 	 * @return Boolean
@@ -354,7 +368,7 @@ public class Drawer implements OnClickListener, OnTouchListener
 			return false;
 		}
 
-		if (event.getAction() == MotionEvent.ACTION_UP)
+		if (event.getAction() == MotionEvent.ACTION_UP && isAllowCloseOnTouch())
 		{
 			int border = mDrawerWidth - (mDrawerWidth / 3);
 
@@ -380,6 +394,25 @@ public class Drawer implements OnClickListener, OnTouchListener
 				proxy.setLeft(mDrawerWidth);
 			}
 
+			mDeviation = 0;
+			mMoved = false;
+
+			return true;
+		}
+		if (event.getAction() == MotionEvent.ACTION_UP && !isAllowCloseOnTouch())
+		{
+			mMovedBeyondMargin = false;
+			if (isAnimationEnabled())
+			{
+				showWithAnimation();
+			}
+			else
+			{
+				DrawerProxy proxy = createDrawerProxy();
+				proxy.setLeft(mDrawerWidth);
+			}
+
+			mDeviation = 0;
 			mMoved = false;
 
 			return true;
@@ -388,7 +421,7 @@ public class Drawer implements OnClickListener, OnTouchListener
 		{
 			mMoved = true;
 
-			mMovedPosition = Math.round(event.getRawX());
+			mMovedPosition = Math.round(event.getRawX() - mDeviation);
 			if (mMovedPosition >= mDrawerWidth)
 			{
 				mMovedPosition = mDrawerWidth;
@@ -441,6 +474,16 @@ public class Drawer implements OnClickListener, OnTouchListener
 		mDecorView.removeView(mDrawerShadow);
 
 		mNeedToReinitialize = true;
+	}
+
+	/**
+	 * Sets whether closing {@link Drawer} is available on touch events.
+	 * 
+	 * @param allowCloseOnTouch true/false
+	 */
+	public void setAllowCloseOnTouch(boolean allowCloseOnTouch)
+	{
+		mAllowCloseOnTouch = allowCloseOnTouch;
 	}
 
 	/**
@@ -553,6 +596,33 @@ public class Drawer implements OnClickListener, OnTouchListener
 		}
 	}
 
+	void showWithTouch(int deviation)
+	{
+		if (isVisible())
+		{
+			return;
+		}
+
+		if (mNeedToReinitialize)
+		{
+			init();
+		}
+
+		mMoved = true;
+		mMovedPosition = 0;
+		mVisible = true;
+		mDeviation = deviation;
+
+		mBackground = ((ViewGroup) mDrawerActivity.getParent()).getBackground();
+		((ViewGroup) mDrawerActivity.getParent()).setBackgroundResource(android.R.color.black);
+
+		DrawerProxy proxy = createDrawerProxy();
+		proxy.setLeft(0);
+
+		updateDrawerClickable();
+		updateDrawerShadow();
+	}
+
 	/**
 	 * Plays show animation. It slides {@link Drawer} from left to right. If
 	 * drawer is currently moved by touch event, animation will start from
@@ -564,8 +634,10 @@ public class Drawer implements OnClickListener, OnTouchListener
 	{
 		final int start = mMoved ? mMovedPosition : 0;
 
+		boolean decelerate = mMoved && !mAllowCloseOnTouch;
+
 		ObjectAnimator anim = ObjectAnimator.ofInt(createDrawerProxy(), "left", start, mDrawerWidth);
-		anim.setInterpolator(new AccelerateInterpolator());
+		anim.setInterpolator(decelerate ? new DecelerateInterpolator() : new AccelerateInterpolator());
 		anim.setDuration(calculateDuration(true));
 		anim.start();
 
