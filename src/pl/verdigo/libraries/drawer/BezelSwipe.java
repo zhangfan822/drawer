@@ -19,8 +19,6 @@ public class BezelSwipe
 
 	private int mIgnoredTopHeight;
 
-	private int mDecorWindowPosition = 0;
-
 	private Drawer mDrawer;
 
 	private boolean mIsBeingDragged = false;
@@ -74,7 +72,7 @@ public class BezelSwipe
 		int x = Math.round(ev.getX());
 		int y = Math.round(ev.getY());
 
-		if (!mIsBeingDragged && y < (mIgnoredTopHeight + mDecorWindowPosition))
+		if (!mIsBeingDragged && y < mIgnoredTopHeight)
 		{
 			return DispatchState.CALL_SUPER;
 		}
