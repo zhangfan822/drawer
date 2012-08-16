@@ -14,7 +14,7 @@ public class BezelSwipe
 
 	public enum DispatchState
 	{
-		CALL_SUPER, RETURN_FALSE, RETURN_TRUE;
+		CALL_SUPER, FAKE_CANCEL, RETURN_FALSE, RETURN_TRUE;
 	}
 
 	private int mIgnoredTopHeight;
@@ -127,6 +127,8 @@ public class BezelSwipe
 
 			cancelSwipe();
 			mIsBeingDragged = false;
+
+			return DispatchState.FAKE_CANCEL;
 		}
 
 		return DispatchState.CALL_SUPER;
