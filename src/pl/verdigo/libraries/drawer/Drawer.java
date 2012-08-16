@@ -420,8 +420,13 @@ public class Drawer implements OnClickListener, OnTouchListener
 		else if (event.getAction() == MotionEvent.ACTION_MOVE)
 		{
 			mMoved = true;
-
 			mMovedPosition = Math.round(event.getRawX() - mDeviation);
+
+			if (mMovedPosition < 0)
+			{
+				mMovedPosition = 0;
+			}
+
 			if (mMovedPosition >= mDrawerWidth)
 			{
 				mMovedPosition = mDrawerWidth;

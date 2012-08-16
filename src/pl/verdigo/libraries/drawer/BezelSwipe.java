@@ -1,9 +1,14 @@
 package pl.verdigo.libraries.drawer;
 
+import android.graphics.Rect;
 import android.view.MotionEvent;
 import android.view.Window;
-import android.widget.FrameLayout;
 
+/**
+ * Bezel Swipe helper class.
+ * 
+ * @author Lukasz Milewski <lukasz.milewski@gmail.com>
+ */
 public class BezelSwipe
 {
 
@@ -12,7 +17,7 @@ public class BezelSwipe
 		CALL_SUPER, RETURN_FALSE, RETURN_TRUE;
 	}
 
-	private int mActionBarHeight;
+	private int mIgnoredTopHeight;
 
 	private int mDecorWindowPosition = 0;
 
@@ -26,16 +31,30 @@ public class BezelSwipe
 
 	private int mLeftDragAreaWidth;
 
-	public BezelSwipe(Window parentWindow, Drawer drawer, int actionBarHeight, int leftDragAreaWidth)
+	/**
+	 * Creates BezelSwipe object.
+	 * 
+	 * @param drawer Drawer
+	 * @param window Window
+	 * @param ignoredTopHeight Ignored height
+	 * @param leftDragAreaWidth Left drag area
+	 */
+	public BezelSwipe(Drawer drawer, Window window, int ignoredTopHeight, int leftDragAreaWidth)
 	{
 		mDrawer = drawer;
-		mActionBarHeight = actionBarHeight;
+		mIgnoredTopHeight = ignoredTopHeight;
 		mLeftDragAreaWidth = leftDragAreaWidth;
-		// mDecorWindowPosition = parentWindow.getWindowManager().getDefaultDisplay().getHeight() - parentWindow.getDecorView().getHeight();
 
-		FrameLayout mDecorView = (FrameLayout) parentWindow.getDecorView();
-		System.out.println(mDecorView.getHeight());
-		System.out.println(mDecorView.getChildAt(0).getHeight());
+		updateNotificationBarHeight(window);
+	}
+
+	private void updateNotificationBarHeight(Window window)
+	{
+		Rect rect = new Rect();
+		window.getDecorView().getWindowVisibleDisplayFrame(rect);
+
+		int notificationHeight = rect.top;
+		mIgnoredTopHeight += notificationHeight;
 	}
 
 	private void cancelSwipe()
@@ -44,12 +63,18 @@ public class BezelSwipe
 		mStartY = -1;
 	}
 
+	/**
+	 * Wrapper for dispatching touch events.
+	 * 
+	 * @param ev Motion event
+	 * @return Return state to original method
+	 */
 	public DispatchState dispatchTouchEvent(MotionEvent ev)
 	{
 		int x = Math.round(ev.getX());
 		int y = Math.round(ev.getY());
 
-		if (!mIsBeingDragged && y < (mActionBarHeight + mDecorWindowPosition))
+		if (!mIsBeingDragged && y < (mIgnoredTopHeight + mDecorWindowPosition))
 		{
 			return DispatchState.CALL_SUPER;
 		}
