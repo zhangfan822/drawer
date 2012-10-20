@@ -34,7 +34,7 @@ public boolean dispatchTouchEvent(MotionEvent ev)
 {
 	if (mBezelSwipe == null)
 	{
-		int dp48 = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 48, getResources().getDisplayMetrics());
+		int dp48 = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 48, getResources().getDisplayMetrics()));
 		mBezelSwipe = new BezelSwipe(mDrawer, getWindow(), getSupportActionBar().getHeight(), dp48);
 	}
 
