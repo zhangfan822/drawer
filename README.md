@@ -3,6 +3,8 @@ AndroidDrawer
 
 A simple but powerful menu drawer implementation. A lot of functionally are based on very [good article][1] by [Cyril Mottier][2] and Facebook mobile application.
 
+You don't need to extend yet another Activity implementation, this simplify integration with bigger applications.
+
 Usage
 =====
 
