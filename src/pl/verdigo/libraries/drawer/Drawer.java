@@ -1,6 +1,7 @@
 package pl.verdigo.libraries.drawer;
 
 import static android.view.ViewGroup.LayoutParams.FILL_PARENT;
+import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
@@ -91,6 +92,8 @@ public class Drawer implements OnClickListener, OnTouchListener
 	private final Window mParentWindow;
 
 	private boolean mReuse = false;
+
+	private boolean mScaleDrawer = false;
 
 	private boolean mVisible = false;
 
@@ -713,6 +716,16 @@ public class Drawer implements OnClickListener, OnTouchListener
 		mDrawerWidth = mActivityWidth - getDrawerMargin();
 	}
 
+	public boolean isScaleDrawer()
+	{
+		return mScaleDrawer;
+	}
+
+	public void setScaleDrawer(boolean scaleDrawer)
+	{
+		this.mScaleDrawer = scaleDrawer;
+	}
+
 	/**
 	 * Internal DrawerProxy class to handle animation of {@link Drawer}
 	 * 
@@ -745,6 +758,7 @@ public class Drawer implements OnClickListener, OnTouchListener
 			return mView.getPaddingLeft();
 		}
 
+		@SuppressLint("NewApi")
 		public void setAlpha(int position)
 		{
 			float value = (Float.valueOf(position) / Float.valueOf(mDrawerWidth)) * 0.7f + 0.3f;
@@ -760,7 +774,7 @@ public class Drawer implements OnClickListener, OnTouchListener
 			setWidth(mViewShadow, left);
 			setWidth(mViewWidth, left);
 
-			if (mMoveDrawer)
+			if (mMoveDrawer || mScaleDrawer)
 			{
 				int maxLeft = mDrawerWidth / DRAWER_CONTENT_MOVE_PROPORTION;
 				int negativePaddingLeft = -1 * (int) (maxLeft - (Float.valueOf(left) / DRAWER_CONTENT_MOVE_PROPORTION));
@@ -772,11 +786,23 @@ public class Drawer implements OnClickListener, OnTouchListener
 			{
 				setAlpha(left);
 			}
+
+			if (mScaleDrawer)
+			{
+				setScale(left);
+			}
 		}
 
 		private void setLeftPadding(View view, int left)
 		{
 			view.setPadding(left, view.getPaddingTop(), view.getPaddingRight(), view.getPaddingBottom());
+		}
+
+		private void setScale(int position)
+		{
+			float scale = (Float.valueOf(position) / Float.valueOf(mDrawerWidth)) * 0.2f + 0.8f;
+			mViewAlpha.setScaleX(scale);
+			mViewAlpha.setScaleY(scale);
 		}
 
 		private void setWidth(View view, int width)
