@@ -1,7 +1,6 @@
 package pl.verdigo.libraries.drawer;
 
 import static android.view.ViewGroup.LayoutParams.FILL_PARENT;
-import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
@@ -341,6 +340,16 @@ public class Drawer implements OnClickListener, OnTouchListener
 	}
 
 	/**
+	 * Is scaling of {@link Drawer} enabled.
+	 * 
+	 * @return Boolean
+	 */
+	public boolean isScaleDrawer()
+	{
+		return mScaleDrawer;
+	}
+
+	/**
 	 * Is drawer currently visible. If it is not visible, internal objects are
 	 * destroyed and {@link Drawer} should not be used.
 	 * 
@@ -586,6 +595,16 @@ public class Drawer implements OnClickListener, OnTouchListener
 	}
 
 	/**
+	 * Sets whether content of {@link Drawer} is scaled during animation.
+	 * 
+	 * @param scaleDrawer true/false
+	 */
+	public void setScaleDrawer(boolean scaleDrawer)
+	{
+		this.mScaleDrawer = scaleDrawer;
+	}
+
+	/**
 	 * Shows {@link Drawer}. If animation is enabled it will be played.
 	 */
 	public void show()
@@ -716,16 +735,6 @@ public class Drawer implements OnClickListener, OnTouchListener
 		mDrawerWidth = mActivityWidth - getDrawerMargin();
 	}
 
-	public boolean isScaleDrawer()
-	{
-		return mScaleDrawer;
-	}
-
-	public void setScaleDrawer(boolean scaleDrawer)
-	{
-		this.mScaleDrawer = scaleDrawer;
-	}
-
 	/**
 	 * Internal DrawerProxy class to handle animation of {@link Drawer}
 	 * 
@@ -758,7 +767,6 @@ public class Drawer implements OnClickListener, OnTouchListener
 			return mView.getPaddingLeft();
 		}
 
-		@SuppressLint("NewApi")
 		public void setAlpha(int position)
 		{
 			float value = (Float.valueOf(position) / Float.valueOf(mDrawerWidth)) * 0.7f + 0.3f;
