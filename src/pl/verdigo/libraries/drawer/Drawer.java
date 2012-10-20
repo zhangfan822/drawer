@@ -1,11 +1,13 @@
 package pl.verdigo.libraries.drawer;
 
 import static android.view.ViewGroup.LayoutParams.FILL_PARENT;
+import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.util.FloatMath;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -93,6 +95,8 @@ public class Drawer implements OnClickListener, OnTouchListener
 	private boolean mReuse = false;
 
 	private boolean mScaleDrawer = false;
+
+	private boolean mTransform3dDrawer = false;
 
 	private boolean mVisible = false;
 
@@ -347,6 +351,16 @@ public class Drawer implements OnClickListener, OnTouchListener
 	public boolean isScaleDrawer()
 	{
 		return mScaleDrawer;
+	}
+
+	/**
+	 * Is 3d transformation of {@link Drawer} enabled.
+	 * 
+	 * @return Boolean
+	 */
+	public boolean isTransform3dDrawer()
+	{
+		return mTransform3dDrawer;
 	}
 
 	/**
@@ -605,6 +619,21 @@ public class Drawer implements OnClickListener, OnTouchListener
 	}
 
 	/**
+	 * Sets whether content of {@link Drawer} is 3d transformed during animation.
+	 * This method is available from Android 3.0 (API level 11). On lower version
+	 * nothing will happen.
+	 * 
+	 * @param transform3dDrawer true/false
+	 */
+	public void setTransform3dDrawer(boolean transform3dDrawer)
+	{
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+		{
+			this.mTransform3dDrawer = transform3dDrawer;
+		}
+	}
+
+	/**
 	 * Shows {@link Drawer}. If animation is enabled it will be played.
 	 */
 	public void show()
@@ -752,6 +781,7 @@ public class Drawer implements OnClickListener, OnTouchListener
 		private View mViewShadow;
 
 		private View mViewWidth;
+		private View mva;
 
 		public DrawerProxy(View view, View viewWidth, View viewShadow, View alphaView)
 		{
@@ -760,6 +790,7 @@ public class Drawer implements OnClickListener, OnTouchListener
 			mViewShadow = viewShadow;
 			mOriginalWidth = mDrawerWidth + getDrawerMargin();
 			mViewAlpha = AnimatorProxy.wrap(alphaView);
+			mva = alphaView;
 		}
 
 		public int getLeft()
@@ -782,7 +813,7 @@ public class Drawer implements OnClickListener, OnTouchListener
 			setWidth(mViewShadow, left);
 			setWidth(mViewWidth, left);
 
-			if (mMoveDrawer || mScaleDrawer)
+			if ((mMoveDrawer || mScaleDrawer) && !mTransform3dDrawer)
 			{
 				int maxLeft = mDrawerWidth / DRAWER_CONTENT_MOVE_PROPORTION;
 				int negativePaddingLeft = -1 * (int) (maxLeft - (Float.valueOf(left) / DRAWER_CONTENT_MOVE_PROPORTION));
@@ -795,9 +826,14 @@ public class Drawer implements OnClickListener, OnTouchListener
 				setAlpha(left);
 			}
 
-			if (mScaleDrawer)
+			if (mScaleDrawer || mTransform3dDrawer )
 			{
 				setScale(left);
+			}
+
+			if (mTransform3dDrawer && Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+			{
+				setTransform3d(left);
 			}
 		}
 
@@ -811,6 +847,17 @@ public class Drawer implements OnClickListener, OnTouchListener
 			float scale = (Float.valueOf(position) / Float.valueOf(mDrawerWidth)) * 0.2f + 0.8f;
 			mViewAlpha.setScaleX(scale);
 			mViewAlpha.setScaleY(scale);
+		}
+
+		@TargetApi(11)
+		private void setTransform3d(int position)
+		{
+			int maxLeft = Math.round(mDrawerWidth * 0.9f);
+			int negativePaddingLeft = -1 * (int) (maxLeft - (Float.valueOf(position) * 0.9f));
+			setLeftPadding(mViewWidth, negativePaddingLeft);
+
+			float rotate = (Float.valueOf(position) / Float.valueOf(mDrawerWidth)) * 0.9f + 0.1f;
+			mva.setRotationY(-45 + (rotate * 45));
 		}
 
 		private void setWidth(View view, int width)
