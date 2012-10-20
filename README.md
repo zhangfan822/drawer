@@ -6,14 +6,12 @@ A simple but powerful menu drawer implementation. A lot of functionally are base
 You don't need to extend yet another Activity implementation, this simplify integration with bigger applications.
 
 Usage
-=====
+-
 
-Creating drawer object
+Creating drawer object, second parameter is layout we want to inject into drawer
 
 ```java
-Drawer drawer = new Drawer(this, R.layout.drawer_content, getWindow(), 100, 300);
-drawer.setFadeDrawer(true);
-drawer.setMoveDrawer(true);
+mDrawer = new Drawer(this, R.layout.drawer_content, getWindow(), 100, 300);
 ```
 
 Opening drawer
@@ -22,8 +20,24 @@ Opening drawer
 drawer.show();
 ```
 
-BezelSwipe
-==========
+By default, each time drawer is opened its content is created and disposed when closed, this behaviour can be changed by setting reuse flag
+
+```java
+mDrawer.setReuse(true);
+```
+
+Drawer can have different animations while opening and closing
+
+```java
+mDrawer.setFadeDrawer(true); // this will fade in/out content of drawer
+mDrawer.setMoveDrawer(true); // this will create parallax effect
+mDrawer.setScaleDrawer(true); // this will create effect of coming content from background
+mDrawer.setTransform3dDrawer(true); // this will apply 3d transformation
+```
+Two last options are very similar to default ICS Launcher effects
+
+Bezel Swipe
+-
 
 AndroidDrawer library also provides ability to open drawer by swiping finger from bezel.
 To use that functionality override dispatchTouchEvent method in your Activity
@@ -80,10 +94,6 @@ License
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-
-
-
-
 
 
  [1]: http://android.cyrilmottier.com/?p=658
