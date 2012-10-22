@@ -826,12 +826,12 @@ public class Drawer implements OnClickListener, OnTouchListener
 				setAlpha(left);
 			}
 
-			if (mScaleDrawer || mTransform3dDrawer )
+			if (mScaleDrawer && !mTransform3dDrawer)
 			{
 				setScale(left);
 			}
 
-			if (mTransform3dDrawer && Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+			if (mTransform3dDrawer)
 			{
 				setTransform3d(left);
 			}
@@ -855,6 +855,10 @@ public class Drawer implements OnClickListener, OnTouchListener
 			int maxLeft = Math.round(mDrawerWidth * 0.9f);
 			int negativePaddingLeft = -1 * (int) (maxLeft - (Float.valueOf(position) * 0.9f));
 			setLeftPadding(mViewWidth, negativePaddingLeft);
+
+			float scale = (Float.valueOf(position) / Float.valueOf(mDrawerWidth)) * 0.3f + 0.7f;
+			mViewAlpha.setScaleX(scale);
+			mViewAlpha.setScaleY(scale);
 
 			float rotate = (Float.valueOf(position) / Float.valueOf(mDrawerWidth)) * 0.9f + 0.1f;
 			mva.setRotationY(-45 + (rotate * 45));
