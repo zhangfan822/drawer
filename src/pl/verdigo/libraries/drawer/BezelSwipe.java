@@ -120,6 +120,11 @@ public class BezelSwipe
 			return DispatchState.RETURN_FALSE;
 		}
 
+		if (ev.getAction() == MotionEvent.ACTION_UP && mIsBeingDragged)
+		{
+			mDrawer.finishShowing();
+		}
+
 		if ((ev.getAction() == MotionEvent.ACTION_UP || ev.getAction() == MotionEvent.ACTION_CANCEL) && mIsBeingDragged)
 		{
 			mDrawer.onTouch(null, ev);

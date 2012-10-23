@@ -165,7 +165,7 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 
 		if (mDrawerListener != null)
 		{
-			mDrawerListener.onBeforeCancel();
+			mDrawerListener.onDrawerBeforeCancel();
 		}
 
 		mVisible = false;
@@ -508,6 +508,11 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 		mDrawerClickable.setVisibility(View.GONE);
 		mDrawerShadow.setVisibility(View.GONE);
 
+		if (mDrawerListener != null)
+		{
+			mDrawerListener.onDrawerAfterCancel();
+		}
+
 		if (mReuse)
 		{
 			ViewGroup.LayoutParams params = mDrawer.getLayoutParams();
@@ -668,6 +673,11 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 			init();
 		}
 
+		if (mDrawerListener != null)
+		{
+			mDrawerListener.onDrawerBeforeShow();
+		}
+
 		mMoved = false;
 		mMovedPosition = 0;
 		mVisible = true;
@@ -683,6 +693,8 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 
 			updateDrawerClickable();
 			updateDrawerShadow();
+
+			finishShowing();
 		}
 	}
 
@@ -726,6 +738,27 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 		ObjectAnimator anim = ObjectAnimator.ofInt(createDrawerProxy(), "left", start, mDrawerWidth);
 		anim.setInterpolator(decelerate ? new DecelerateInterpolator() : new AccelerateInterpolator());
 		anim.setDuration(calculateDuration(true));
+		anim.addListener(new AnimatorListener()
+		{
+			public void onAnimationStart(Animator animation)
+			{
+			}
+			
+			public void onAnimationRepeat(Animator animation)
+			{
+			}
+			
+			public void onAnimationEnd(Animator animation)
+			{
+				finishShowing();
+			}
+			
+			public void onAnimationCancel(Animator animation)
+			{
+				finishShowing();
+			}
+		});
+
 		anim.start();
 
 		if (mMoved)
@@ -735,6 +768,14 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 
 		updateDrawerClickable();
 		updateDrawerShadow();
+	}
+
+	void finishShowing()
+	{
+		if (mDrawerListener != null)
+		{
+			mDrawerListener.onDrawerAfterShow();
+		}
 	}
 
 	/**
