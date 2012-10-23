@@ -1,6 +1,8 @@
 package pl.verdigo.libraries.drawer;
 
 import static android.view.ViewGroup.LayoutParams.FILL_PARENT;
+import pl.verdigo.libraries.drawer.internal.LeftDrawer;
+import pl.verdigo.libraries.drawer.internal.RightDrawer;
 import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.Activity;
@@ -31,7 +33,7 @@ import com.actionbarsherlock.internal.nineoldandroids.view.animation.AnimatorPro
  * 
  * @author Lukasz Milewski <lukasz.milewski@gmail.com>
  */
-public class Drawer implements OnClickListener, OnTouchListener
+public abstract class Drawer implements OnClickListener, OnTouchListener
 {
 
 	private static final int DRAWER_CONTENT_MOVE_PROPORTION = 5;
@@ -40,7 +42,7 @@ public class Drawer implements OnClickListener, OnTouchListener
 
 	private static final long DEFAULT_DURATION = 250;
 
-	private static final int DRAWER_SHADOW_WIDTH = 12;
+	private static final int DRAWER_SHADOW_WIDTH = 8;
 
 	private int mActivityWidth;
 
@@ -48,9 +50,7 @@ public class Drawer implements OnClickListener, OnTouchListener
 
 	private boolean mAnimationEnabled = true;
 
-	private Drawable mBackground;
-
-	private final Context mContext;
+	private Context mContext;
 
 	private FrameLayout mDecorView;
 
@@ -66,7 +66,7 @@ public class Drawer implements OnClickListener, OnTouchListener
 
 	private DrawerListener mDrawerListener;
 
-	private final float mDrawerMargin;
+	private float mDrawerMargin;
 
 	private View mDrawerShadow;
 
@@ -76,7 +76,7 @@ public class Drawer implements OnClickListener, OnTouchListener
 
 	private float mLandDrawerWidth;
 
-	private final int mLayout;
+	private int mLayout;
 
 	private boolean mMovable = true;
 
@@ -90,15 +90,27 @@ public class Drawer implements OnClickListener, OnTouchListener
 
 	private boolean mNeedToReinitialize = false;
 
-	private final Window mParentWindow;
+	private Window mParentWindow;
 
 	private boolean mReuse = false;
 
 	private boolean mScaleDrawer = false;
 
+	private int mShadowWidth = DRAWER_SHADOW_WIDTH;
+
 	private boolean mTransform3dDrawer = false;
 
 	private boolean mVisible = false;
+
+	public static Drawer createLeftDrawer(Context context, int layout, Window parentWindow, float drawerMargin, float landDrawerWidth)
+	{
+		return new LeftDrawer(context, layout, parentWindow, drawerMargin, landDrawerWidth);
+	}
+
+	public static Drawer createRightDrawer(Context context, int layout, Window parentWindow, float drawerMargin, float landDrawerWidth)
+	{
+		return new RightDrawer(context, layout, parentWindow, drawerMargin, landDrawerWidth);
+	}
 
 	/**
 	 * Creates {@link Drawer} object.
@@ -109,7 +121,7 @@ public class Drawer implements OnClickListener, OnTouchListener
 	 * @param drawerMargin Right margin in portrait mode
 	 * @param landDrawerWidth {@link Drawer} width in landscape mode
 	 */
-	public Drawer(Context context, int layout, Window parentWindow, float drawerMargin, float landDrawerWidth)
+	protected Drawer(Context context, int layout, Window parentWindow, float drawerMargin, float landDrawerWidth)
 	{
 		mContext = context;
 		mLayout = layout;
@@ -277,8 +289,8 @@ public class Drawer implements OnClickListener, OnTouchListener
 		mDecorView.addView(mDrawerShadow);
 
 		ImageView shadow = new ImageView(mContext);
-		shadow.setLayoutParams(new LinearLayout.LayoutParams(DRAWER_SHADOW_WIDTH, FILL_PARENT));
-		shadow.setBackgroundResource(R.drawable.drawer_shadow);
+		shadow.setLayoutParams(new LinearLayout.LayoutParams(mShadowWidth, FILL_PARENT));
+		shadow.setBackgroundResource(R.drawable.drawer_shadow_left);
 		((LinearLayout) mDrawerShadow).addView(shadow);
 
 		mDrawerClickable = new ImageView(mContext);
@@ -486,8 +498,6 @@ public class Drawer implements OnClickListener, OnTouchListener
 		mMovedBeyondMargin = false;
 		mMovedPosition = 0;
 		
-		((FrameLayout) mDrawerActivity.getParent()).setBackgroundDrawable(mBackground);
-		
 		ViewGroup.LayoutParams lp = ((ViewGroup) mDrawerActivity).getLayoutParams();
 		lp.width = -1;
 		mDrawerActivity.setLayoutParams(lp);
@@ -619,6 +629,16 @@ public class Drawer implements OnClickListener, OnTouchListener
 	}
 
 	/**
+	 * Sets shadow width
+	 * 
+	 * @param shadowWidth width
+	 */
+	public void setShadowWidth(int shadowWidth)
+	{
+		this.mShadowWidth = shadowWidth;
+	}
+
+	/**
 	 * Sets whether content of {@link Drawer} is 3d transformed during animation.
 	 * This method is available from Android 3.0 (API level 11). On lower version
 	 * nothing will happen.
@@ -652,9 +672,6 @@ public class Drawer implements OnClickListener, OnTouchListener
 		mMovedPosition = 0;
 		mVisible = true;
 
-		mBackground = ((ViewGroup) mDrawerActivity.getParent()).getBackground();
-		((ViewGroup) mDrawerActivity.getParent()).setBackgroundResource(android.R.color.black);
-
 		if (isAnimationEnabled())
 		{
 			showWithAnimation();
@@ -685,9 +702,6 @@ public class Drawer implements OnClickListener, OnTouchListener
 		mMovedPosition = 0;
 		mVisible = true;
 		mDeviation = deviation;
-
-		mBackground = ((ViewGroup) mDrawerActivity.getParent()).getBackground();
-		((ViewGroup) mDrawerActivity.getParent()).setBackgroundResource(android.R.color.black);
 
 		DrawerProxy proxy = createDrawerProxy();
 		proxy.setLeft(0);
@@ -744,6 +758,9 @@ public class Drawer implements OnClickListener, OnTouchListener
 	 */
 	private void updateDrawerShadow()
 	{
+		View shadow = ((LinearLayout) mDrawerShadow).getChildAt(0);
+		shadow.setLayoutParams(new LinearLayout.LayoutParams(mShadowWidth, FILL_PARENT));
+
 		FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mDrawerShadow.getLayoutParams();
 		lp.gravity = Gravity.FILL_VERTICAL;
 		lp.width = 0;
@@ -807,7 +824,7 @@ public class Drawer implements OnClickListener, OnTouchListener
 		public void setLeft(int left)
 		{
 			setLeftPadding(mView, left);
-			setLeftPadding(mViewShadow, left - 8);
+			setLeftPadding(mViewShadow, left - mShadowWidth);
 
 			setWidth(mView, mOriginalWidth + left);
 			setWidth(mViewShadow, left);
