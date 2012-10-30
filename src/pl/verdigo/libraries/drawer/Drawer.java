@@ -74,9 +74,9 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 
 	private boolean mFadeDrawer = false;
 
-	private float mDrawerWidthPortrait;
+	private float mDrawerWidthPortrait = -48;
 
-	private float mDrawerWidthLand;
+	private float mDrawerWidthLand = -40;
 
 	private int mLayout;
 
