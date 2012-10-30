@@ -36,9 +36,13 @@ import com.actionbarsherlock.internal.nineoldandroids.view.animation.AnimatorPro
 public abstract class Drawer implements OnClickListener, OnTouchListener
 {
 
-	private static final int DRAWER_CONTENT_MOVE_PROPORTION = 5;
+	public static final int ORIENTATION_BOTH = 0;
 
-	public static final float LAND_NO_CHANGE = -1f;
+	public static final int ORIENTATION_POTRAIT = 1;
+
+	public static final int ORIENTATION_LANDSCAPE = 2;
+
+	private static final int DRAWER_CONTENT_MOVE_PROPORTION = 5;
 
 	private static final long DEFAULT_DURATION = 250;
 
@@ -66,15 +70,13 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 
 	private DrawerListener mDrawerListener;
 
-	private float mDrawerMargin;
-
 	private View mDrawerShadow;
-
-	private int mDrawerWidth;
 
 	private boolean mFadeDrawer = false;
 
-	private float mLandDrawerWidth;
+	private float mDrawerWidthPortrait;
+
+	private float mDrawerWidthLand;
 
 	private int mLayout;
 
@@ -102,14 +104,14 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 
 	private boolean mVisible = false;
 
-	public static Drawer createLeftDrawer(Context context, int layout, Window parentWindow, float drawerMargin, float landDrawerWidth)
+	public static Drawer createLeftDrawer(Context context, int layout)
 	{
-		return new LeftDrawer(context, layout, parentWindow, drawerMargin, landDrawerWidth);
+		return new LeftDrawer(context, layout);
 	}
 
-	public static Drawer createRightDrawer(Context context, int layout, Window parentWindow, float drawerMargin, float landDrawerWidth)
+	public static Drawer createRightDrawer(Context context, int layout)
 	{
-		return new RightDrawer(context, layout, parentWindow, drawerMargin, landDrawerWidth);
+		return new RightDrawer(context, layout);
 	}
 
 	/**
@@ -117,19 +119,16 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 	 * 
 	 * @param context Context
 	 * @param layout Layout to inflate into {@link Drawer}
-	 * @param parentWindow Window
-	 * @param drawerMargin Right margin in portrait mode
-	 * @param landDrawerWidth {@link Drawer} width in landscape mode
 	 */
-	protected Drawer(Context context, int layout, Window parentWindow, float drawerMargin, float landDrawerWidth)
+	protected Drawer(Context context, int layout)
 	{
 		mContext = context;
 		mLayout = layout;
-		mParentWindow = parentWindow;
-		mDrawerMargin = drawerMargin;
-		mLandDrawerWidth = landDrawerWidth;
 
-		init();
+		if (mContext instanceof Activity)
+		{
+			mParentWindow = ((Activity) mContext).getWindow();
+		}
 	}
 
 	/**
@@ -143,7 +142,7 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 	{
 		if (mMoved)
 		{
-			float ratio = (float) mMovedPosition / mDrawerWidth;
+			float ratio = (float) mMovedPosition / getDrawerWidth();
 			long duration = Math.round(DEFAULT_DURATION * (show ? 1F - ratio : ratio));
 
 			return duration >= 0 ? duration : 0;
@@ -190,9 +189,9 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 	 */
 	private void cancelWithAnimation()
 	{
-		final int start = mMoved ? mMovedPosition : mDrawerWidth;
+		final int start = mMoved ? mMovedPosition : getDrawerWidth();
 
-		ObjectAnimator anim = ObjectAnimator.ofInt(createDrawerProxy(), "left", start, 0);
+		ObjectAnimator anim = ObjectAnimator.ofInt(createDrawerProxy(), "position", start, 0);
 		anim.setInterpolator(new DecelerateInterpolator());
 		anim.setDuration(calculateDuration(false));
 		anim.addListener(new AnimatorListener()
@@ -249,22 +248,27 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 	}
 
 	/**
-	 * Returns {@link Drawer} margin. Value provided by developer is in DPI,
+	 * Returns {@link Drawer} width. Value provided by developer is in DPI,
 	 * therefore it has to be calculated into pixels.
 	 * 
-	 * @return Drawer margin in pixels
+	 * @return Drawer width in pixels
 	 */
-	private int getDrawerMargin()
+	private int getDrawerWidth()
 	{
-		float margin = mDrawerMargin;
 		float density = mContext.getResources().getDisplayMetrics().density;
+		float width = mDrawerWidthPortrait;
 
-		if (mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE && mLandDrawerWidth != LAND_NO_CHANGE)
+		if (mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
 		{
-			margin = (mActivityWidth / density) - mLandDrawerWidth;
+			width = mDrawerWidthLand;
 		}
 
-		return (int) FloatMath.ceil(margin * density);
+		if (width < 0)
+		{
+			width = (mActivityWidth / density) - Math.abs(width);
+		}
+
+		return (int) FloatMath.ceil(width * density);
 	}
 
 	/**
@@ -273,7 +277,7 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 	 * move {@link ActionBar}. Clickable {@link ImageView} is also created to
 	 * handle click and touch events.
 	 */
-	private void init()
+	public void init()
 	{
 		mDecorView = (FrameLayout) mParentWindow.getDecorView();
 		mDrawerActivity = (ViewGroup) mDecorView.getChildAt(0);
@@ -413,30 +417,32 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 			return false;
 		}
 
+		int drawerWidth = getDrawerWidth();
+
 		if (event.getAction() == MotionEvent.ACTION_UP && isAllowCloseOnTouch())
 		{
-			int border = mDrawerWidth - (mDrawerWidth / 3);
+			int border = drawerWidth - (drawerWidth / 3);
 
 			if (event.getRawX() < border)
 			{
 				cancel();
 				return true;
 			}
-			else if (event.getRawX() >= mDrawerWidth && !mMovedBeyondMargin)
+			else if (event.getRawX() >= drawerWidth && !mMovedBeyondMargin)
 			{
 				cancel();
 				return true;
 			}
 
 			mMovedBeyondMargin = false;
-			if (mMovedPosition < mDrawerWidth && isAnimationEnabled())
+			if (mMovedPosition < drawerWidth && isAnimationEnabled())
 			{
 				showWithAnimation();
 			}
 			else if (!isAnimationEnabled())
 			{
 				DrawerProxy proxy = createDrawerProxy();
-				proxy.setLeft(mDrawerWidth);
+				proxy.setPosition(drawerWidth);
 			}
 
 			mDeviation = 0;
@@ -454,7 +460,7 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 			else
 			{
 				DrawerProxy proxy = createDrawerProxy();
-				proxy.setLeft(mDrawerWidth);
+				proxy.setPosition(drawerWidth);
 			}
 
 			mDeviation = 0;
@@ -472,9 +478,9 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 				mMovedPosition = 0;
 			}
 
-			if (mMovedPosition >= mDrawerWidth)
+			if (mMovedPosition >= drawerWidth)
 			{
-				mMovedPosition = mDrawerWidth;
+				mMovedPosition = drawerWidth;
 			}
 			else
 			{
@@ -482,7 +488,7 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 			}
 
 			DrawerProxy proxy = createDrawerProxy();
-			proxy.setLeft(mMovedPosition);
+			proxy.setPosition(mMovedPosition);
 
 			return true;
 		}
@@ -581,6 +587,36 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 	public void setDrawerListener(DrawerListener listener)
 	{
 		mDrawerListener = listener;
+	}
+
+	/**
+	 * Sets (@link Drawer) width for portrait and landscape. Negative value will
+	 * result in subtracting width from entire activity width
+	 * 
+	 * @param drawerWidth Drawer width in DIPs
+	 */
+	public void setDrawerWidth(float drawerWidth)
+	{
+		setDrawerWidth(ORIENTATION_BOTH, drawerWidth);
+	}
+
+	/**
+	 * Sets (@link Drawer) width for portrait and/or landscape. Negative value will
+	 * result in subtracting width from entire activity width
+	 * 
+	 * @param type Type
+	 * @param drawerWidth Drawer width in DIPs
+	 */
+	public void setDrawerWidth(int type, float drawerWidth)
+	{
+		if (type == ORIENTATION_BOTH || type == ORIENTATION_POTRAIT)
+		{
+			mDrawerWidthPortrait = drawerWidth;
+		}
+		if (type == ORIENTATION_BOTH || type == ORIENTATION_LANDSCAPE)
+		{
+			mDrawerWidthLand = drawerWidth;
+		}
 	}
 
 	/**
@@ -689,7 +725,7 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 		else
 		{
 			DrawerProxy proxy = createDrawerProxy();
-			proxy.setLeft(mActivityWidth - getDrawerMargin());
+			proxy.setPosition(getDrawerWidth());
 
 			updateDrawerClickable();
 			updateDrawerShadow();
@@ -716,7 +752,7 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 		mDeviation = deviation;
 
 		DrawerProxy proxy = createDrawerProxy();
-		proxy.setLeft(0);
+		proxy.setPosition(0);
 
 		updateDrawerClickable();
 		updateDrawerShadow();
@@ -735,7 +771,7 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 
 		boolean decelerate = mMoved && !mAllowCloseOnTouch;
 
-		ObjectAnimator anim = ObjectAnimator.ofInt(createDrawerProxy(), "left", start, mDrawerWidth);
+		ObjectAnimator anim = ObjectAnimator.ofInt(createDrawerProxy(), "position", start, getDrawerWidth());
 		anim.setInterpolator(decelerate ? new DecelerateInterpolator() : new AccelerateInterpolator());
 		anim.setDuration(calculateDuration(true));
 		anim.addListener(new AnimatorListener()
@@ -783,9 +819,9 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 	 */
 	private void updateDrawerClickable()
 	{
-		FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mDrawerClickable.getLayoutParams();
+        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mDrawerClickable.getLayoutParams();
 		lp.gravity = Gravity.RIGHT | Gravity.FILL_VERTICAL;
-		lp.width = getDrawerMargin();
+		lp.width = mActivityWidth - getDrawerWidth();
 
 		mDrawerClickable.setLayoutParams(lp);
 		mDrawerClickable.setVisibility(View.VISIBLE);
@@ -817,9 +853,7 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 	private void updateDrawerWidth()
 	{
 		mDrawer.getLayoutParams().width = 0;
-		mDrawer.findViewById(R.id.drawer_content).getLayoutParams().width = mActivityWidth - getDrawerMargin();
-
-		mDrawerWidth = mActivityWidth - getDrawerMargin();
+		mDrawer.findViewById(R.id.drawer_content).getLayoutParams().width = getDrawerWidth();
 	}
 
 	/**
@@ -833,22 +867,27 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 		private int mOriginalWidth;
 
 		private View mView;
+		
+		private View mViewAlpha;
 
-		private AnimatorProxy mViewAlpha;
+		private AnimatorProxy mViewAlphaProxy;
 
 		private View mViewShadow;
 
 		private View mViewWidth;
-		private View mva;
+
+		private int mDrawerWidth;
 
 		public DrawerProxy(View view, View viewWidth, View viewShadow, View alphaView)
 		{
 			mView = view;
 			mViewWidth = viewWidth;
 			mViewShadow = viewShadow;
-			mOriginalWidth = mDrawerWidth + getDrawerMargin();
-			mViewAlpha = AnimatorProxy.wrap(alphaView);
-			mva = alphaView;
+			mViewAlpha = alphaView;
+			mViewAlphaProxy = AnimatorProxy.wrap(alphaView);
+
+			mOriginalWidth = mActivityWidth;
+			mDrawerWidth = getDrawerWidth();
 		}
 
 		public int getLeft()
@@ -859,39 +898,39 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 		public void setAlpha(int position)
 		{
 			float value = (Float.valueOf(position) / Float.valueOf(mDrawerWidth)) * 0.7f + 0.3f;
-			mViewAlpha.setAlpha(value);
+			mViewAlphaProxy.setAlpha(value);
 		}
 
-		public void setLeft(int left)
+		public void setPosition(int position)
 		{
-			setLeftPadding(mView, left);
-			setLeftPadding(mViewShadow, left - mShadowWidth);
+			setLeftPadding(mView, position);
+			setLeftPadding(mViewShadow, position - mShadowWidth);
 
-			setWidth(mView, mOriginalWidth + left);
-			setWidth(mViewShadow, left);
-			setWidth(mViewWidth, left);
+			setWidth(mView, mOriginalWidth + position);
+			setWidth(mViewShadow, position);
+			setWidth(mViewWidth, position);
 
 			if ((mMoveDrawer || mScaleDrawer) && !mTransform3dDrawer)
 			{
 				int maxLeft = mDrawerWidth / DRAWER_CONTENT_MOVE_PROPORTION;
-				int negativePaddingLeft = -1 * (int) (maxLeft - (Float.valueOf(left) / DRAWER_CONTENT_MOVE_PROPORTION));
+				int negativePaddingLeft = -1 * (int) (maxLeft - (Float.valueOf(position) / DRAWER_CONTENT_MOVE_PROPORTION));
 
 				setLeftPadding(mViewWidth, negativePaddingLeft);
 			}
 
 			if (mFadeDrawer)
 			{
-				setAlpha(left);
+				setAlpha(position);
 			}
 
 			if (mScaleDrawer && !mTransform3dDrawer)
 			{
-				setScale(left);
+				setScale(position);
 			}
 
 			if (mTransform3dDrawer)
 			{
-				setTransform3d(left);
+				setTransform3d(position);
 			}
 		}
 
@@ -903,8 +942,8 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 		private void setScale(int position)
 		{
 			float scale = (Float.valueOf(position) / Float.valueOf(mDrawerWidth)) * 0.2f + 0.8f;
-			mViewAlpha.setScaleX(scale);
-			mViewAlpha.setScaleY(scale);
+			mViewAlphaProxy.setScaleX(scale);
+			mViewAlphaProxy.setScaleY(scale);
 		}
 
 		@TargetApi(11)
@@ -915,11 +954,11 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 			setLeftPadding(mViewWidth, negativePaddingLeft);
 
 			float scale = (Float.valueOf(position) / Float.valueOf(mDrawerWidth)) * 0.3f + 0.7f;
-			mViewAlpha.setScaleX(scale);
-			mViewAlpha.setScaleY(scale);
+			mViewAlphaProxy.setScaleX(scale);
+			mViewAlphaProxy.setScaleY(scale);
 
 			float rotate = (Float.valueOf(position) / Float.valueOf(mDrawerWidth)) * 0.9f + 0.1f;
-			mva.setRotationY(-45 + (rotate * 45));
+			mViewAlpha.setRotationY(-45 + (rotate * 45));
 		}
 
 		private void setWidth(View view, int width)
