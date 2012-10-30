@@ -8,16 +8,30 @@ You don't need to extend yet another Activity implementation, this simplify inte
 Usage
 -
 
-Creating drawer object, second parameter is layout we want to inject into drawer
+Creating drawer object, second parameter is layout we want to inject into drawer.
 
 ```java
-mDrawer = new Drawer(this, R.layout.drawer_content, getWindow(), 100, 300);
+mDrawer = new Drawer(this, R.layout.drawer_content);
+mDrawer.init();
 ```
 
 Opening drawer
 
 ```java
-drawer.show();
+mDrawer.show();
+```
+
+Width of drawer is set by default to 48dip in portrait and 40dip in landscape. This can be overriden using method setDrawerWidth(). By providing negative value drawer will expand its width to entire screen minus width provided by parameter.
+
+```java
+mDrawer.setDrawerWidth(70f);
+```
+
+Orientations can also be set separately
+
+```java
+mDrawer.setDrawerWidth(Drawer.ORIENTATION_PORTRAIT, 70f);
+mDrawer.setDrawerWidth(Drawer.ORIENTATION_LANDSCAPE, 100f);
 ```
 
 By default, each time drawer is opened its content is created and disposed when closed, this behaviour can be changed by setting reuse flag
