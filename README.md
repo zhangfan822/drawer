@@ -11,7 +11,7 @@ Usage
 Creating drawer object, second parameter is layout we want to inject into drawer.
 
 ```java
-mDrawer = new Drawer(this, R.layout.drawer_content);
+mDrawer = Drawer.createLeftDrawer(this, R.layout.drawer_content);
 mDrawer.init();
 ```
 
