@@ -52,6 +52,8 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 
 	private boolean mAllowCloseOnTouch = true;
 
+	private long mAnimationDuration = DEFAULT_DURATION;
+
 	private boolean mAnimationEnabled = true;
 
 	private Context mContext;
@@ -143,12 +145,12 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 		if (mMoved)
 		{
 			float ratio = (float) mMovedPosition / getDrawerWidth();
-			long duration = Math.round(DEFAULT_DURATION * (show ? 1F - ratio : ratio));
+			long duration = Math.round(mAnimationDuration * (show ? 1F - ratio : ratio));
 
 			return duration >= 0 ? duration : 0;
 		}
 
-		return DEFAULT_DURATION;
+		return mAnimationDuration;
 	}
 
 	/**
@@ -543,6 +545,16 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 	public void setAllowCloseOnTouch(boolean allowCloseOnTouch)
 	{
 		mAllowCloseOnTouch = allowCloseOnTouch;
+	}
+
+	/**
+	 * Sets duration of {@link Drawer} open/close animation.
+	 * 
+	 * @param animationDuration Duration in milliseconds
+	 */
+	public void setAnimationDuration(long animationDuration)
+	{
+		mAnimationDuration = animationDuration;
 	}
 
 	/**
