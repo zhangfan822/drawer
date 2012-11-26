@@ -56,12 +56,12 @@ public class RightDrawer extends Drawer
 		{
 			int border = drawerWidth - (drawerWidth / 3);
 
-			if (event.getRawX() < border)
+			if (mMovedPosition > 0 - border)
 			{
 				cancel();
 				return true;
 			}
-			else if (event.getRawX() >= drawerWidth && !mMovedBeyondMargin)
+			else if (mMovedPosition >= drawerWidth && !mMovedBeyondMargin)
 			{
 				cancel();
 				return true;
@@ -79,7 +79,9 @@ public class RightDrawer extends Drawer
 			}
 
 			mDeviation = 0;
+
 			mMoved = false;
+			mMovedPosition = 0;
 
 			return true;
 		}
@@ -100,6 +102,10 @@ public class RightDrawer extends Drawer
 			mMoved = false;
 
 			return true;
+		}
+		else if (event.getAction() == MotionEvent.ACTION_DOWN)
+		{
+			mDeviation = Math.round(event.getRawX()) + getDrawerWidth();
 		}
 		else if (event.getAction() == MotionEvent.ACTION_MOVE)
 		{
