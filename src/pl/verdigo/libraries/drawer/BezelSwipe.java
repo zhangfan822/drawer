@@ -29,6 +29,8 @@ public class BezelSwipe
 
 	private int mLeftDragAreaWidth;
 
+	private int mWindowWidth;
+
 	/**
 	 * Creates BezelSwipe object.
 	 * 
@@ -42,6 +44,7 @@ public class BezelSwipe
 		mDrawer = drawer;
 		mIgnoredTopHeight = ignoredTopHeight;
 		mLeftDragAreaWidth = leftDragAreaWidth;
+		mWindowWidth = window.getDecorView().getWidth();
 
 		updateNotificationBarHeight(window);
 	}
@@ -80,7 +83,12 @@ public class BezelSwipe
 		if (ev.getAction() == MotionEvent.ACTION_DOWN)
 		{
 			mIsBeingDragged = false;
-			if (x < mLeftDragAreaWidth)
+			if (x < mLeftDragAreaWidth && !mDrawer.isRightDrawer())
+			{
+				mStartX = x;
+				mStartY = y;
+			}
+			else if (x > mWindowWidth - mLeftDragAreaWidth && mDrawer.isRightDrawer())
 			{
 				mStartX = x;
 				mStartY = y;
@@ -102,7 +110,12 @@ public class BezelSwipe
 				return DispatchState.CALL_SUPER;
 			}
 
-			if (x - mStartX >= mLeftDragAreaWidth)
+			if (x - mStartX >= mLeftDragAreaWidth && !mDrawer.isRightDrawer())
+			{
+				mIsBeingDragged = true;
+			}
+
+			if (mStartX - x >= mLeftDragAreaWidth && mDrawer.isRightDrawer())
 			{
 				mIsBeingDragged = true;
 			}
