@@ -11,6 +11,8 @@ import com.actionbarsherlock.internal.nineoldandroids.view.animation.AnimatorPro
 public class LeftDrawer extends Drawer
 {
 
+	private DrawerProxy mDrawerProxy;
+
 	public LeftDrawer(Context context, int layout)
 	{
 		super(context, layout);
@@ -33,7 +35,12 @@ public class LeftDrawer extends Drawer
 	 */
 	protected IDrawerProxy createDrawerProxy()
 	{
-		return new DrawerProxy(mDrawerActivity, mDrawer, mDrawerShadow, mDrawerContent);
+		if (mDrawerProxy == null)
+		{
+			mDrawerProxy = new DrawerProxy(mDrawerActivity, mDrawer, mDrawerShadow, mDrawerContent);
+		}
+
+		return mDrawerProxy;
 	}
 
 	/**
