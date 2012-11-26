@@ -42,69 +42,69 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 
 	public static final int ORIENTATION_LANDSCAPE = 2;
 
-	private static final int DRAWER_CONTENT_MOVE_PROPORTION = 5;
+	protected static final int DRAWER_CONTENT_MOVE_PROPORTION = 5;
 
-	private static final long DEFAULT_DURATION = 250;
+	protected static final long DEFAULT_DURATION = 250;
 
-	private static final int DRAWER_SHADOW_WIDTH = 8;
+	protected static final int DRAWER_SHADOW_WIDTH = 8;
 
-	private int mActivityWidth;
+	protected int mActivityWidth;
 
-	private boolean mAllowCloseOnTouch = true;
+	protected boolean mAllowCloseOnTouch = true;
 
-	private long mAnimationDuration = DEFAULT_DURATION;
+	protected long mAnimationDuration = DEFAULT_DURATION;
 
-	private boolean mAnimationEnabled = true;
+	protected boolean mAnimationEnabled = true;
 
-	private Context mContext;
+	protected Context mContext;
 
-	private FrameLayout mDecorView;
+	protected FrameLayout mDecorView;
 
-	private int mDeviation = 0;
+	protected int mDeviation = 0;
 
-	private View mDrawer;
+	protected View mDrawer;
 
-	private View mDrawerActivity;
+	protected View mDrawerActivity;
 
-	private ImageView mDrawerClickable;
+	protected ImageView mDrawerClickable;
 
-	private LinearLayout mDrawerContent;
+	protected LinearLayout mDrawerContent;
 
-	private DrawerListener mDrawerListener;
+	protected DrawerListener mDrawerListener;
 
-	private View mDrawerShadow;
+	protected View mDrawerShadow;
 
-	private boolean mFadeDrawer = false;
+	protected boolean mFadeDrawer = false;
 
-	private float mDrawerWidthPortrait = -48;
+	protected float mDrawerWidthPortrait = -48;
 
-	private float mDrawerWidthLand = -40;
+	protected float mDrawerWidthLand = -40;
 
-	private int mLayout;
+	protected int mLayout;
 
-	private boolean mMovable = true;
+	protected boolean mMovable = true;
 
-	private boolean mMoved = false;
+	protected boolean mMoved = false;
 
-	private boolean mMoveDrawer = false;
+	protected boolean mMoveDrawer = false;
 
-	private boolean mMovedBeyondMargin = false;
+	protected boolean mMovedBeyondMargin = false;
 
-	private int mMovedPosition = 0;
+	protected int mMovedPosition = 0;
 
-	private boolean mNeedToReinitialize = false;
+	protected boolean mNeedToReinitialize = false;
 
-	private Window mParentWindow;
+	protected Window mParentWindow;
 
-	private boolean mReuse = false;
+	protected boolean mReuse = false;
 
-	private boolean mScaleDrawer = false;
+	protected boolean mScaleDrawer = false;
 
-	private int mShadowWidth = DRAWER_SHADOW_WIDTH;
+	protected int mShadowWidth = DRAWER_SHADOW_WIDTH;
 
-	private boolean mTransform3dDrawer = false;
+	protected boolean mTransform3dDrawer = false;
 
-	private boolean mVisible = false;
+	protected boolean mVisible = false;
 
 	public static Drawer createLeftDrawer(Context context, int layout)
 	{
