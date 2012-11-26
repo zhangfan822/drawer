@@ -79,7 +79,9 @@ public class LeftDrawer extends Drawer
 			}
 
 			mDeviation = 0;
+
 			mMoved = false;
+			mMovedPosition = 0;
 
 			return true;
 		}
