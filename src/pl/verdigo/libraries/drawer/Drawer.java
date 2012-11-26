@@ -145,7 +145,7 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 			float ratio = (float) mMovedPosition / getDrawerWidth();
 			long duration = Math.round(mAnimationDuration * (show ? 1F - ratio : ratio));
 
-			return duration >= 0 ? duration : 0;
+			return duration >= 0 ? duration : -1 * duration;
 		}
 
 		return mAnimationDuration;
@@ -411,6 +411,8 @@ public abstract class Drawer implements OnClickListener, OnTouchListener
 	{
 		mMovedBeyondMargin = false;
 		mMovedPosition = 0;
+		mDeviation = 0;
+		mMoved = false;
 		
 		ViewGroup.LayoutParams lp = ((ViewGroup) mDrawerActivity).getLayoutParams();
 		lp.width = -1;
